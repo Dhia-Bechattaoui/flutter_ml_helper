@@ -1,0 +1,29 @@
+name: flutter_ml_helper
+description: Easy integration with TensorFlow Lite and ML Kit for Flutter applications. Supports all 6 platforms with WASM compatibility.
+version: 0.0.1
+homepage: https://github.com/Dhia-Bechattaoui/flutter_ml_helper
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  tflite_flutter: ^0.11.0
+  google_ml_kit: ^0.20.0
+  image: ^4.0.0
+  path_provider: ^2.0.0
+  path: ^1.0.0
+  permission_handler: ^12.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  test: ^1.0.0
+  mockito: ^5.0.0
+  build_runner: ^2.0.0
+
+flutter:
+  # No Flutter-specific dependencies needed for this package
