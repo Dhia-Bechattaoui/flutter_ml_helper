@@ -84,8 +84,9 @@ class MLResult {
     if (predictions.isEmpty) return null;
     if (confidences.isEmpty) return predictions.first;
 
-    final maxIndex =
-        confidences.indexOf(confidences.reduce((a, b) => a > b ? a : b));
+    final maxIndex = confidences.indexOf(
+      confidences.reduce((a, b) => a > b ? a : b),
+    );
     return predictions[maxIndex];
   }
 

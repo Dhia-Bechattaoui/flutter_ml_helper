@@ -1,11 +1,20 @@
 # Flutter ML Helper
 
 [![Pub Version](https://img.shields.io/pub/v/flutter_ml_helper)](https://pub.dev/packages/flutter_ml_helper)
-[![Flutter Version](https://img.shields.io/badge/flutter-3.10.0+-blue.svg)](https://flutter.dev/)
-[![Dart Version](https://img.shields.io/badge/dart-3.0.0+-blue.svg)](https://dart.dev/)
+[![CI](https://github.com/Dhia-Bechattaoui/flutter_ml_helper/actions/workflows/ci.yml/badge.svg)](https://github.com/Dhia-Bechattaoui/flutter_ml_helper/actions/workflows/ci.yml)
+[![Flutter Version](https://img.shields.io/badge/flutter-3.32.0+-blue.svg)](https://flutter.dev/)
+[![Dart Version](https://img.shields.io/badge/dart-3.8.0+-blue.svg)](https://dart.dev/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Easy integration with TensorFlow Lite and ML Kit for Flutter applications. Supports all 6 platforms with WASM compatibility.
+
+## Demo
+
+<div align="center">
+  <img src="assets/text.gif" width="300" alt="Text Recognition Demo">
+  <img src="assets/face.gif" width="300" alt="Face Detection Demo">
+  <img src="assets/tflite.gif" width="300" alt="TFLite Inference Demo">
+</div>
 
 ## Features
 
@@ -207,9 +216,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📧 Email: [your-email@example.com]
 - 🐛 Issues: [GitHub Issues](https://github.com/Dhia-Bechattaoui/flutter_ml_helper/issues)
 - 📖 Documentation: [API Reference](https://pub.dev/documentation/flutter_ml_helper)
+- 💬 Discussions: [GitHub Discussions](https://github.com/Dhia-Bechattaoui/flutter_ml_helper/discussions)
 
 ## Changelog
 

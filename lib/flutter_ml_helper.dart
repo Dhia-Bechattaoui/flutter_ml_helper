@@ -41,6 +41,7 @@ export 'src/models/ml_model_info.dart';
 // Utilities
 export 'src/utils/permission_utils.dart';
 export 'src/utils/path_utils.dart';
+export 'src/utils/imagenet_labels.dart';
 
 // Constants
 export 'src/constants/ml_constants.dart';

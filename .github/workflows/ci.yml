@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Verify formatting
+        run: dart format --set-exit-if-changed lib test
+      - name: Analyze code
+        run: flutter analyze lib test
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run tests
+        run: flutter test
+
+  test_example:
+    name: Test Example App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: 'stable'
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          cd example && flutter pub get
+      - name: Analyze example
+        run: cd example && flutter analyze lib
+      - name: Verify example formatting
+        run: cd example && dart format --set-exit-if-changed lib
+
+  dependency_check:
+    name: Dependency Compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Check for outdated dependencies
+        run: flutter pub outdated --no-dev-dependencies --no-dependency-overrides
+      - name: Test downgrade compatibility
+        run: |
+          flutter pub downgrade --no-example
+          flutter analyze lib
+
+  package_analysis:
+    name: Package Analysis (pana)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: 'stable'
+      - name: Install pana
+        run: dart pub global activate pana
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run pana
+        run: dart pub global run pana .
+        continue-on-error: true
+

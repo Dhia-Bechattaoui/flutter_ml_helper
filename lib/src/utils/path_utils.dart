@@ -153,9 +153,11 @@ class PathUtils {
       return files
           .whereType<String>()
           .map((file) => path.basename(file))
-          .where((name) =>
-              name.endsWith(MLConstants.tfliteExtension) ||
-              name.endsWith(MLConstants.wasmExtension))
+          .where(
+            (name) =>
+                name.endsWith(MLConstants.tfliteExtension) ||
+                name.endsWith(MLConstants.wasmExtension),
+          )
           .toList();
     } catch (e) {
       return [];
@@ -229,7 +231,9 @@ class PathUtils {
 
   /// Copies a file to a new location
   static Future<bool> copyFile(
-      String sourcePath, String destinationPath) async {
+    String sourcePath,
+    String destinationPath,
+  ) async {
     if (MLConstants.isWeb) return false;
 
     try {
@@ -315,10 +319,6 @@ class PathUtils {
 
   static List<String> _getWebAvailableModels() {
     // Return list of available web models
-    return [
-      'model.wasm',
-      'classifier.wasm',
-      'detector.wasm',
-    ];
+    return ['model.wasm', 'classifier.wasm', 'detector.wasm'];
   }
 }

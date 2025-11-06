@@ -7,8 +7,13 @@ class MLConstants {
   MLConstants._();
 
   // Backend names
+  /// TensorFlow Lite backend identifier
   static const String backendTFLite = 'TFLite';
+
+  /// Google ML Kit backend identifier
   static const String backendMLKit = 'MLKit';
+
+  /// WebAssembly backend identifier
   static const String backendWASM = 'WASM';
 
   // Model file extensions
@@ -17,9 +22,16 @@ class MLConstants {
   static const String jsonExtension = '.json';
 
   // Default model configurations
+  /// Default input size for image models (224x224 pixels)
   static const int defaultInputSize = 224;
+
+  /// Default batch size for inference
   static const int defaultBatchSize = 1;
+
+  /// Default data type for model tensors
   static const String defaultDataType = 'float32';
+
+  /// Default confidence threshold for predictions (0.0 to 1.0)
   static const double defaultConfidenceThreshold = 0.5;
 
   // Image processing constants
@@ -30,12 +42,15 @@ class MLConstants {
     'jpeg',
     'png',
     'bmp',
-    'webp'
+    'webp',
   ];
 
   // Performance constants
   static const int maxConcurrentInferences = 4;
-  static const int defaultTimeoutMs = 30000; // 30 seconds
+
+  /// Default timeout for operations in milliseconds (30 seconds)
+  static const int defaultTimeoutMs = 30000;
+
   static const int maxModelSizeBytes = 100 * 1024 * 1024; // 100MB
 
   // Error messages
@@ -76,9 +91,18 @@ class MLConstants {
   }
 
   // Platform-specific features
+  /// Whether the current platform can access the file system
   static bool get canAccessFileSystem => !isWeb;
+
+  /// Whether the current platform can access the camera
   static bool get canAccessCamera => isMobile || isWeb;
+
+  /// Whether the current platform can access storage
   static bool get canAccessStorage => !isWeb;
+
+  /// Whether the current platform can access the microphone
   static bool get canAccessMicrophone => isMobile || isWeb;
+
+  /// Whether the current platform can access location services
   static bool get canAccessLocation => isMobile || isWeb;
 }

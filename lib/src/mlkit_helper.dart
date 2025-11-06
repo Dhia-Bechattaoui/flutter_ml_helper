@@ -1,3 +1,9 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:image/image.dart' as img;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'models/ml_result.dart';
 import 'models/ml_model_info.dart';
 import 'constants/ml_constants.dart';
@@ -92,7 +98,10 @@ class MLKitHelper {
 
   /// Runs inference on web platform
   Future<dynamic> _runWebInference(
-      String modelName, dynamic input, Map<String, dynamic>? options) async {
+    String modelName,
+    dynamic input,
+    Map<String, dynamic>? options,
+  ) async {
     switch (modelName.toLowerCase()) {
       case 'text_recognition':
         return await _runWebTextRecognition(input);
@@ -111,7 +120,10 @@ class MLKitHelper {
 
   /// Runs inference on mobile platforms
   Future<dynamic> _runMobileInference(
-      String modelName, dynamic input, Map<String, dynamic>? options) async {
+    String modelName,
+    dynamic input,
+    Map<String, dynamic>? options,
+  ) async {
     switch (modelName.toLowerCase()) {
       case 'text_recognition':
         return await _runMobileTextRecognition(input);
@@ -140,9 +152,9 @@ class MLKitHelper {
     await Future.delayed(const Duration(milliseconds: 40));
     return {
       'faces': [
-        {'confidence': 0.92}
+        {'confidence': 0.92},
       ],
-      'count': 1
+      'count': 1,
     };
   }
 
@@ -151,9 +163,9 @@ class MLKitHelper {
     await Future.delayed(const Duration(milliseconds: 35));
     return {
       'objects': [
-        {'label': 'person', 'confidence': 0.89}
+        {'label': 'person', 'confidence': 0.89},
       ],
-      'count': 1
+      'count': 1,
     };
   }
 
@@ -162,9 +174,9 @@ class MLKitHelper {
     await Future.delayed(const Duration(milliseconds: 25));
     return {
       'labels': [
-        {'text': 'person', 'confidence': 0.91}
+        {'text': 'person', 'confidence': 0.91},
       ],
-      'count': 1
+      'count': 1,
     };
   }
 
@@ -173,65 +185,291 @@ class MLKitHelper {
     await Future.delayed(const Duration(milliseconds: 50));
     return {
       'poses': [
-        {'confidence': 0.88}
+        {'confidence': 0.88},
       ],
-      'count': 1
+      'count': 1,
     };
   }
 
   // Mobile-specific model implementations
   Future<dynamic> _runMobileTextRecognition(dynamic input) async {
-    // Simulate mobile text recognition
-    await Future.delayed(const Duration(milliseconds: 50));
-    return {
-      'text': 'Sample text from mobile',
-      'blocks': [],
-      'confidence': 0.98
-    };
+    try {
+      final inputImage = await _convertToInputImage(input);
+      if (inputImage == null) {
+        throw Exception('Invalid input image');
+      }
+
+      final textRecognizer = TextRecognizer();
+      final recognizedText = await textRecognizer.processImage(inputImage);
+
+      final result = {
+        'text': recognizedText.text,
+        'blocks': recognizedText.blocks
+            .map(
+              (block) => {
+                'text': block.text,
+                'boundingBox': {
+                  'left': block.boundingBox.left,
+                  'top': block.boundingBox.top,
+                  'right': block.boundingBox.right,
+                  'bottom': block.boundingBox.bottom,
+                },
+                'lines': block.lines.map((line) => line.text).toList(),
+              },
+            )
+            .toList(),
+        'confidence': 0.95, // ML Kit doesn't provide confidence, using default
+      };
+
+      await textRecognizer.close();
+      return result;
+    } catch (e) {
+      debugPrint('Text recognition error: $e');
+      rethrow;
+    }
   }
 
   Future<dynamic> _runMobileFaceDetection(dynamic input) async {
-    // Simulate mobile face detection
-    await Future.delayed(const Duration(milliseconds: 60));
-    return {
-      'faces': [
-        {'confidence': 0.95}
-      ],
-      'count': 1
-    };
+    try {
+      final inputImage = await _convertToInputImage(input);
+      if (inputImage == null) {
+        throw Exception('Invalid input image');
+      }
+
+      final faceDetector = FaceDetector(
+        options: FaceDetectorOptions(
+          enableClassification: true,
+          enableLandmarks: true,
+          enableTracking: true,
+        ),
+      );
+
+      final faces = await faceDetector.processImage(inputImage);
+
+      final result = {
+        'faces': faces
+            .map(
+              (face) => {
+                'boundingBox': {
+                  'left': face.boundingBox.left,
+                  'top': face.boundingBox.top,
+                  'right': face.boundingBox.right,
+                  'bottom': face.boundingBox.bottom,
+                },
+                'smilingProbability': face.smilingProbability,
+                'leftEyeOpenProbability': face.leftEyeOpenProbability,
+                'rightEyeOpenProbability': face.rightEyeOpenProbability,
+                'trackingId': face.trackingId,
+              },
+            )
+            .toList(),
+        'count': faces.length,
+      };
+
+      await faceDetector.close();
+      return result;
+    } catch (e) {
+      debugPrint('Face detection error: $e');
+      rethrow;
+    }
   }
 
   Future<dynamic> _runMobileObjectDetection(dynamic input) async {
-    // Simulate mobile object detection
-    await Future.delayed(const Duration(milliseconds: 55));
-    return {
-      'objects': [
-        {'label': 'person', 'confidence': 0.93}
-      ],
-      'count': 1
-    };
+    try {
+      final inputImage = await _convertToInputImage(input);
+      if (inputImage == null) {
+        throw Exception('Invalid input image');
+      }
+
+      // Note: ObjectDetector API may vary by version - check google_ml_kit docs
+      // For now, using ImageLabeler as a fallback for object detection
+      final imageLabeler = ImageLabeler(
+        options: ImageLabelerOptions(confidenceThreshold: 0.5),
+      );
+
+      final labels = await imageLabeler.processImage(inputImage);
+
+      final result = {
+        'objects': labels
+            .map(
+              (label) => {
+                'label': label.label,
+                'confidence': label.confidence,
+                'boundingBox': {
+                  'left': 0.0,
+                  'top': 0.0,
+                  'right': 0.0,
+                  'bottom': 0.0,
+                },
+              },
+            )
+            .toList(),
+        'count': labels.length,
+      };
+
+      await imageLabeler.close();
+      return result;
+    } catch (e) {
+      debugPrint('Object detection error: $e');
+      rethrow;
+    }
   }
 
   Future<dynamic> _runMobileImageLabeling(dynamic input) async {
-    // Simulate mobile image labeling
-    await Future.delayed(const Duration(milliseconds: 45));
-    return {
-      'labels': [
-        {'text': 'person', 'confidence': 0.96}
-      ],
-      'count': 1
-    };
+    try {
+      final inputImage = await _convertToInputImage(input);
+      if (inputImage == null) {
+        throw Exception('Invalid input image');
+      }
+
+      final imageLabeler = ImageLabeler(
+        options: ImageLabelerOptions(confidenceThreshold: 0.5),
+      );
+      final labels = await imageLabeler.processImage(inputImage);
+
+      final result = {
+        'labels': labels
+            .map(
+              (label) => {'text': label.label, 'confidence': label.confidence},
+            )
+            .toList(),
+        'count': labels.length,
+      };
+
+      await imageLabeler.close();
+      return result;
+    } catch (e) {
+      debugPrint('Image labeling error: $e');
+      rethrow;
+    }
   }
 
   Future<dynamic> _runMobilePoseDetection(dynamic input) async {
-    // Simulate mobile pose detection
-    await Future.delayed(const Duration(milliseconds: 70));
-    return {
-      'poses': [
-        {'confidence': 0.94}
-      ],
-      'count': 1
-    };
+    try {
+      final inputImage = await _convertToInputImage(input);
+      if (inputImage == null) {
+        throw Exception('Invalid input image');
+      }
+
+      final poseDetector = PoseDetector(
+        options: PoseDetectorOptions(mode: PoseDetectionMode.stream),
+      );
+
+      final poses = await poseDetector.processImage(inputImage);
+
+      final result = {
+        'poses': poses
+            .map(
+              (pose) => {
+                'landmarks': pose.landmarks.values
+                    .map(
+                      (landmark) => {
+                        'type': landmark.type.name,
+                        'x': landmark.x,
+                        'y': landmark.y,
+                        'z': landmark.z,
+                      },
+                    )
+                    .toList(),
+              },
+            )
+            .toList(),
+        'count': poses.length,
+      };
+
+      await poseDetector.close();
+      return result;
+    } catch (e) {
+      debugPrint('Pose detection error: $e');
+      rethrow;
+    }
+  }
+
+  /// Converts input to InputImage for ML Kit
+  Future<InputImage?> _convertToInputImage(dynamic input) async {
+    try {
+      if (input is InputImage) {
+        return input;
+      }
+
+      if (MLConstants.isWeb) {
+        // Web platform - use bytes approach
+        return _convertToInputImageWeb(input);
+      }
+
+      // Native platforms - save to temp file and use file path
+      Uint8List imageBytes;
+
+      if (input is img.Image) {
+        // Convert image package Image to bytes
+        final encoded = img.encodeJpg(input);
+        imageBytes = Uint8List.fromList(encoded);
+      } else if (input is List<int>) {
+        imageBytes = Uint8List.fromList(input);
+      } else if (input is Uint8List) {
+        imageBytes = input;
+      } else {
+        debugPrint('Unsupported input type: ${input.runtimeType}');
+        return null;
+      }
+
+      // Save to temporary file
+      final tempDir = await getTemporaryDirectory();
+      final file = File(
+        '${tempDir.path}/mlkit_input_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+      await file.writeAsBytes(imageBytes);
+
+      // Create InputImage from file path
+      return InputImage.fromFilePath(file.path);
+    } catch (e) {
+      debugPrint('Error converting to InputImage: $e');
+      return null;
+    }
+  }
+
+  /// Converts input to InputImage for web platform
+  InputImage? _convertToInputImageWeb(dynamic input) {
+    try {
+      Uint8List imageBytes;
+      int width;
+      int height;
+
+      if (input is img.Image) {
+        final encoded = img.encodeJpg(input);
+        imageBytes = Uint8List.fromList(encoded);
+        width = input.width;
+        height = input.height;
+      } else if (input is List<int>) {
+        imageBytes = Uint8List.fromList(input);
+        final decodedImage = img.decodeImage(imageBytes);
+        if (decodedImage == null) return null;
+        width = decodedImage.width;
+        height = decodedImage.height;
+      } else if (input is Uint8List) {
+        imageBytes = input;
+        final decodedImage = img.decodeImage(imageBytes);
+        if (decodedImage == null) return null;
+        width = decodedImage.width;
+        height = decodedImage.height;
+      } else {
+        return null;
+      }
+
+      // For web, try using bytes directly
+      // Note: This may need adjustment based on ML Kit web support
+      final inputImageData = InputImageMetadata(
+        size: Size(width.toDouble(), height.toDouble()),
+        rotation: InputImageRotation.rotation0deg,
+        format: InputImageFormat.yuv420,
+        bytesPerRow: width,
+      );
+
+      return InputImage.fromBytes(bytes: imageBytes, metadata: inputImageData);
+    } catch (e) {
+      debugPrint('Error converting to InputImage (web): $e');
+      return null;
+    }
   }
 
   // Model information

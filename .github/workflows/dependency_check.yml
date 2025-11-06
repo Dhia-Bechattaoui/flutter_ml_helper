@@ -1,0 +1,24 @@
+name: Dependency Check
+
+on:
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check_dependencies:
+    name: Check for Outdated Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Check for outdated dependencies
+        run: flutter pub outdated --no-dev-dependencies --no-dependency-overrides
+        continue-on-error: true
+

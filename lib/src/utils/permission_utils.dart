@@ -1,4 +1,6 @@
+import 'package:permission_handler/permission_handler.dart';
 import '../constants/ml_constants.dart';
+import '../constants/platform_detection.dart';
 
 /// Utility class for handling device permissions required by ML operations
 /// Supports all platforms including web with conditional permission handling
@@ -233,9 +235,8 @@ class PermissionUtils {
   // Mobile implementations (using permission_handler)
   static Future<bool> _checkMobileCameraPermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      final status = await Permission.camera.status;
+      return status.isGranted;
     } catch (e) {
       return false;
     }
@@ -243,9 +244,8 @@ class PermissionUtils {
 
   static Future<bool> _requestMobileCameraPermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      final status = await Permission.camera.request();
+      return status.isGranted;
     } catch (e) {
       return false;
     }
@@ -253,9 +253,14 @@ class PermissionUtils {
 
   static Future<bool> _checkMobileStoragePermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      // On Android 13+, use photos/videos instead
+      if (PlatformDetection.isAndroid) {
+        final status = await Permission.photos.status;
+        return status.isGranted;
+      } else {
+        final status = await Permission.storage.status;
+        return status.isGranted;
+      }
     } catch (e) {
       return false;
     }
@@ -263,9 +268,14 @@ class PermissionUtils {
 
   static Future<bool> _requestMobileStoragePermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      // On Android 13+, use photos/videos instead
+      if (PlatformDetection.isAndroid) {
+        final status = await Permission.photos.request();
+        return status.isGranted;
+      } else {
+        final status = await Permission.storage.request();
+        return status.isGranted;
+      }
     } catch (e) {
       return false;
     }
@@ -273,9 +283,8 @@ class PermissionUtils {
 
   static Future<bool> _checkMobileMicrophonePermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      final status = await Permission.microphone.status;
+      return status.isGranted;
     } catch (e) {
       return false;
     }
@@ -283,9 +292,8 @@ class PermissionUtils {
 
   static Future<bool> _requestMobileMicrophonePermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      final status = await Permission.microphone.request();
+      return status.isGranted;
     } catch (e) {
       return false;
     }
@@ -293,9 +301,8 @@ class PermissionUtils {
 
   static Future<bool> _checkMobileLocationPermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      final status = await Permission.location.status;
+      return status.isGranted;
     } catch (e) {
       return false;
     }
@@ -303,9 +310,8 @@ class PermissionUtils {
 
   static Future<bool> _requestMobileLocationPermission() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return true as placeholder
-      return true;
+      final status = await Permission.location.request();
+      return status.isGranted;
     } catch (e) {
       return false;
     }
@@ -313,31 +319,71 @@ class PermissionUtils {
 
   static Future<bool> _openMobileAppSettings() async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return false as placeholder
-      return false;
+      return await openAppSettings();
     } catch (e) {
       return false;
     }
   }
 
   static Future<bool> _checkMobilePermissionPermanentlyDenied(
-      String permission) async {
+    String permission,
+  ) async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return false as placeholder
-      return false;
+      Permission perm;
+      switch (permission.toLowerCase()) {
+        case 'camera':
+          perm = Permission.camera;
+          break;
+        case 'storage':
+        case 'photos':
+          perm = PlatformDetection.isAndroid
+              ? Permission.photos
+              : Permission.storage;
+          break;
+        case 'microphone':
+          perm = Permission.microphone;
+          break;
+        case 'location':
+          perm = Permission.location;
+          break;
+        default:
+          return false;
+      }
+
+      final status = await perm.status;
+      return status.isPermanentlyDenied;
     } catch (e) {
       return false;
     }
   }
 
   static Future<bool> _checkMobileShouldShowRequestRationale(
-      String permission) async {
+    String permission,
+  ) async {
     try {
-      // This would use permission_handler on mobile
-      // For now, return false as placeholder
-      return false;
+      Permission perm;
+      switch (permission.toLowerCase()) {
+        case 'camera':
+          perm = Permission.camera;
+          break;
+        case 'storage':
+        case 'photos':
+          perm = PlatformDetection.isAndroid
+              ? Permission.photos
+              : Permission.storage;
+          break;
+        case 'microphone':
+          perm = Permission.microphone;
+          break;
+        case 'location':
+          perm = Permission.location;
+          break;
+        default:
+          return false;
+      }
+
+      final status = await perm.status;
+      return status.isDenied;
     } catch (e) {
       return false;
     }

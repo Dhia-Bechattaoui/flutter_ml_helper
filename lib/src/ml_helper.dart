@@ -21,9 +21,9 @@ class MLHelper {
     bool enableTFLite = true,
     bool enableMLKit = true,
     bool enableWASM = false,
-  })  : _tfLiteHelper = TFLiteHelper(enableWASM: enableWASM),
-        _mlKitHelper = MLKitHelper(),
-        _imageHelper = ImageHelper();
+  }) : _tfLiteHelper = TFLiteHelper(enableWASM: enableWASM),
+       _mlKitHelper = MLKitHelper(),
+       _imageHelper = ImageHelper();
 
   /// Gets the TensorFlow Lite helper instance
   TFLiteHelper get tfLite => _tfLiteHelper;
@@ -45,15 +45,15 @@ class MLHelper {
 
   /// Gets the current platform information
   Map<String, dynamic> get platformInfo => {
-        'isWeb': MLConstants.isWeb,
-        'isMobile': MLConstants.isMobile,
-        'isDesktop': MLConstants.isDesktop,
-        'supportsTFLite': MLConstants.supportsTFLite,
-        'supportsMLKit': MLConstants.supportsMLKit,
-        'supportsWASM': MLConstants.supportsWASM,
-        'canAccessCamera': MLConstants.canAccessCamera,
-        'canAccessStorage': MLConstants.canAccessStorage,
-      };
+    'isWeb': MLConstants.isWeb,
+    'isMobile': MLConstants.isMobile,
+    'isDesktop': MLConstants.isDesktop,
+    'supportsTFLite': MLConstants.supportsTFLite,
+    'supportsMLKit': MLConstants.supportsMLKit,
+    'supportsWASM': MLConstants.supportsWASM,
+    'canAccessCamera': MLConstants.canAccessCamera,
+    'canAccessStorage': MLConstants.canAccessStorage,
+  };
 
   /// Gets information about available ML models
   Future<List<MLModelInfo>> getAvailableModels() async {
