@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.3] - 2025-11-06
+
+### Fixed
+- **CI Dependency Resolution**: Fixed dependency conflicts with `test`, `mockito`, and `build_runner` packages to ensure compatibility with Flutter SDK test_api constraints
+
+### Changed
+- **Dev Dependencies**: Updated dev dependencies for better CI compatibility:
+  - test: `^1.0.0` (downgraded from `^1.26.2` to resolve test_api conflicts)
+  - mockito: `^5.0.0` (downgraded from `^5.5.0`)
+  - build_runner: `^2.0.0` (downgraded from `^2.7.1`)
+
 ## [0.0.2] - 2025-11-05
 
 ### Added

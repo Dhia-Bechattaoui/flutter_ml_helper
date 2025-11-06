@@ -111,3 +111,7 @@ coverage/
 # WASM related
 *.wasm
 *.wat
+
+# Lockfiles
+pubspec.lock
+!example/pubspec.lock
