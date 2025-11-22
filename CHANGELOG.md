@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-11-22
+
 ### Added
 - **HEIC Image Format Support**: Native HEIC/HEIF image decoding on iOS and Android
   - Automatic platform-specific native decoding using platform channels
@@ -119,7 +121,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - path_provider: ^2.1.2
 - permission_handler: ^11.3.1
 
-[Unreleased]: https://github.com/Dhia-Bechattaoui/flutter_ml_helper/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/Dhia-Bechattaoui/flutter_ml_helper/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Dhia-Bechattaoui/flutter_ml_helper/compare/v0.0.3...v0.1.0
 [0.0.3]: https://github.com/Dhia-Bechattaoui/flutter_ml_helper/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/Dhia-Bechattaoui/flutter_ml_helper/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/Dhia-Bechattaoui/flutter_ml_helper/releases/tag/v0.0.1

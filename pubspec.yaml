@@ -1,6 +1,6 @@
 name: flutter_ml_helper
 description: Easy integration with TensorFlow Lite and ML Kit for Flutter applications. Supports all 6 platforms with WASM compatibility.
-version: 0.0.3
+version: 0.1.0
 homepage: https://github.com/Dhia-Bechattaoui/flutter_ml_helper
 repository: https://github.com/Dhia-Bechattaoui/flutter_ml_helper
 issue_tracker: https://github.com/Dhia-Bechattaoui/flutter_ml_helper/issues
