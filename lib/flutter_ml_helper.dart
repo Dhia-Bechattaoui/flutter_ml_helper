@@ -26,7 +26,7 @@
 ///
 /// See the [README](https://github.com/Dhia-Bechattaoui/flutter_ml_helper)
 /// for more detailed usage examples.
-library flutter_ml_helper;
+library;
 
 // Core ML Helper classes
 export 'src/ml_helper.dart';
@@ -42,6 +42,7 @@ export 'src/models/ml_model_info.dart';
 export 'src/utils/permission_utils.dart';
 export 'src/utils/path_utils.dart';
 export 'src/utils/imagenet_labels.dart';
+export 'src/utils/image_format_detector.dart';
 
 // Constants
 export 'src/constants/ml_constants.dart';

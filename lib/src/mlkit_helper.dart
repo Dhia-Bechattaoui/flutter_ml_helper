@@ -50,10 +50,78 @@ class MLKitHelper {
       stopwatch.stop();
       final inferenceTime = stopwatch.elapsedMicroseconds / 1000.0;
 
+      final predictions = _extractPredictions(result);
+      final confidences = _extractConfidences(result);
+
+      // Special handling for text recognition: if no text found or only empty text, return a message
+      if (modelName.toLowerCase() == 'text_recognition') {
+        // Check if hasText flag indicates no text
+        final noTextFromFlag =
+            result is Map &&
+            result.containsKey('hasText') &&
+            result['hasText'] == false;
+
+        // Check if we have exactly 1 prediction that is empty/whitespace
+        final singleEmptyPrediction =
+            predictions.length == 1 &&
+            predictions.first is String &&
+            (predictions.first as String).trim().isEmpty;
+
+        if (predictions.isEmpty || noTextFromFlag || singleEmptyPrediction) {
+          return MLResult.success(
+            rawOutput: result,
+            predictions: ['No text detected'],
+            confidences: [0.0],
+            modelName: modelName,
+            backend: backend,
+            inferenceTime: inferenceTime,
+            metadata: {
+              'modelType': modelName,
+              'mlKitVersion': '0.20.0',
+              'platform': MLConstants.isWeb ? 'web' : 'mobile',
+              'noTextFound': true,
+            },
+          );
+        }
+      }
+
+      // Special handling for face detection: if no face found, return a message
+      if (modelName.toLowerCase() == 'face_detection') {
+        // Check if count is 0 or faces list is empty
+        final noFaceFromCount =
+            result is Map &&
+            result.containsKey('count') &&
+            result['count'] == 0;
+
+        // Check if faces list is empty
+        final noFaceFromList =
+            result is Map &&
+            result.containsKey('faces') &&
+            result['faces'] is List &&
+            (result['faces'] as List).isEmpty;
+
+        if (predictions.isEmpty || noFaceFromCount || noFaceFromList) {
+          return MLResult.success(
+            rawOutput: result,
+            predictions: ['No face detected'],
+            confidences: [0.0],
+            modelName: modelName,
+            backend: backend,
+            inferenceTime: inferenceTime,
+            metadata: {
+              'modelType': modelName,
+              'mlKitVersion': '0.20.0',
+              'platform': MLConstants.isWeb ? 'web' : 'mobile',
+              'noFaceFound': true,
+            },
+          );
+        }
+      }
+
       return MLResult.success(
         rawOutput: result,
-        predictions: _extractPredictions(result),
-        confidences: _extractConfidences(result),
+        predictions: predictions,
+        confidences: confidences,
         modelName: modelName,
         backend: backend,
         inferenceTime: inferenceTime,
@@ -202,23 +270,41 @@ class MLKitHelper {
       final textRecognizer = TextRecognizer();
       final recognizedText = await textRecognizer.processImage(inputImage);
 
+      // Filter out empty or whitespace-only blocks and lines
+      final meaningfulBlocks = recognizedText.blocks
+          .where((block) => block.text.trim().isNotEmpty)
+          .toList();
+
+      // Get meaningful text (non-empty, non-whitespace)
+      final meaningfulText = recognizedText.text.trim();
+
+      // Check if there's any meaningful text
+      if (meaningfulText.isEmpty) {
+        await textRecognizer.close();
+        return {'text': '', 'blocks': [], 'confidence': 0.0, 'hasText': false};
+      }
+
       final result = {
-        'text': recognizedText.text,
-        'blocks': recognizedText.blocks
+        'text': meaningfulText,
+        'blocks': meaningfulBlocks
             .map(
               (block) => {
-                'text': block.text,
+                'text': block.text.trim(),
                 'boundingBox': {
                   'left': block.boundingBox.left,
                   'top': block.boundingBox.top,
                   'right': block.boundingBox.right,
                   'bottom': block.boundingBox.bottom,
                 },
-                'lines': block.lines.map((line) => line.text).toList(),
+                'lines': block.lines
+                    .map((line) => line.text.trim())
+                    .where((line) => line.isNotEmpty)
+                    .toList(),
               },
             )
             .toList(),
         'confidence': 0.95, // ML Kit doesn't provide confidence, using default
+        'hasText': true,
       };
 
       await textRecognizer.close();
@@ -475,7 +561,7 @@ class MLKitHelper {
   // Model information
   List<MLModelInfo> _getWebModels() {
     return [
-      MLModelInfo(
+      const MLModelInfo(
         name: 'text_recognition',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -487,7 +573,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'web'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'face_detection',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -499,7 +585,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'web'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'object_detection',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -511,7 +597,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'web'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'image_labeling',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -523,7 +609,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'web'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'pose_detection',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -540,7 +626,7 @@ class MLKitHelper {
 
   List<MLModelInfo> _getMobileModels() {
     return [
-      MLModelInfo(
+      const MLModelInfo(
         name: 'text_recognition',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -552,7 +638,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'mobile'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'face_detection',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -564,7 +650,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'mobile'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'object_detection',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -576,7 +662,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'mobile'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'image_labeling',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -588,7 +674,7 @@ class MLKitHelper {
         isLoaded: true,
         metadata: {'platform': 'mobile'},
       ),
-      MLModelInfo(
+      const MLModelInfo(
         name: 'pose_detection',
         version: '1.0.0',
         backend: MLConstants.backendMLKit,
@@ -607,7 +693,18 @@ class MLKitHelper {
   List<dynamic> _extractPredictions(dynamic result) {
     if (result is Map) {
       if (result.containsKey('text')) {
-        return [result['text']];
+        final text = result['text'];
+        // Filter out empty or whitespace-only text
+        if (text is String && text.trim().isNotEmpty) {
+          // Check hasText flag if available, or verify text is meaningful
+          if (result['hasText'] == false) {
+            return []; // No text found
+          }
+          return [text.trim()];
+        } else if (text is String && text.trim().isEmpty) {
+          return []; // Empty text
+        }
+        return [text];
       } else if (result.containsKey('faces')) {
         return result['faces'];
       } else if (result.containsKey('objects')) {
@@ -625,7 +722,14 @@ class MLKitHelper {
   List<double> _extractConfidences(dynamic result) {
     if (result is Map) {
       if (result.containsKey('confidence')) {
-        return [result['confidence']];
+        final confidence = result['confidence'];
+        // If no text found, return empty confidences
+        if (result.containsKey('text') &&
+            result.containsKey('hasText') &&
+            result['hasText'] == false) {
+          return [];
+        }
+        return [confidence];
       } else if (result.containsKey('faces') && result['faces'] is List) {
         return result['faces']
             .map((f) => f['confidence'] ?? 0.9)
@@ -648,7 +752,7 @@ class MLKitHelper {
             .toList();
       }
     }
-    // Default confidence scores
-    return [0.95, 0.85, 0.75];
+    // Default confidence scores (only if we have predictions)
+    return [];
   }
 }

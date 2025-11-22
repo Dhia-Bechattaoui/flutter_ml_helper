@@ -105,7 +105,7 @@ void main() {
 
   group('MLModelInfo Tests', () {
     test('should create model info', () {
-      final modelInfo = MLModelInfo(
+      final modelInfo = const MLModelInfo(
         name: 'test_model',
         version: '1.0.0',
         backend: 'TFLite',
@@ -122,7 +122,7 @@ void main() {
     });
 
     test('should convert to and from JSON', () {
-      final modelInfo = MLModelInfo(
+      final modelInfo = const MLModelInfo(
         name: 'test_model',
         version: '1.0.0',
         backend: 'TFLite',

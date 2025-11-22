@@ -43,6 +43,8 @@ class MLConstants {
     'png',
     'bmp',
     'webp',
+    'heic',
+    'heif',
   ];
 
   // Performance constants

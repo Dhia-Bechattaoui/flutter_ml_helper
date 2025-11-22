@@ -29,7 +29,13 @@ dev_dependencies:
   build_runner: ^2.0.0
 
 flutter:
-  # No Flutter-specific dependencies needed for this package
+  plugin:
+    platforms:
+      android:
+        package: com.github.dhia_bechattaoui.flutter_ml_helper
+        pluginClass: FlutterMlHelperPlugin
+      ios:
+        pluginClass: HeicDecoderPlugin
 
 # Package topics for pub.dev discovery
 topics:

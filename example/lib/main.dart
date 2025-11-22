@@ -17,10 +17,7 @@ class MLHelperExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter ML Helper Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const MLHelperExamplePage(),
     );
   }
@@ -107,9 +104,14 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
     });
 
     try {
+      // Detect image format (for debugging)
+      final format = ImageFormatDetector.detectFormat(_selectedImageBytes!);
+      debugPrint('Detected image format: $format');
+
       // Load and process image
-      final image =
-          await _mlHelper.image.loadImageFromBytes(_selectedImageBytes!);
+      final image = await _mlHelper.image.loadImageFromBytes(
+        _selectedImageBytes!,
+      );
       if (image != null) {
         // Preprocess for ML (you can use this tensor for TFLite inference)
         await _mlHelper.image.preprocessImageForML(
@@ -124,7 +126,15 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
           _isProcessing = false;
         });
 
-        _showSuccess('Image processed successfully!');
+        final formatMsg = format != null ? ' ($format)' : '';
+        _showSuccess(
+          'Image processed successfully! Format: ${format ?? "unknown"}$formatMsg',
+        );
+      } else {
+        setState(() {
+          _isProcessing = false;
+        });
+        _showError('Failed to decode image. Format detected: $format');
       }
     } catch (e) {
       setState(() {
@@ -193,7 +203,8 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
 
       if (result.isSuccess) {
         _showSuccess(
-            'Face detection completed! Found ${result.predictions.length} face(s)');
+          'Face detection completed! Found ${result.predictions.length} face(s)',
+        );
       } else {
         _showError('Face detection failed: ${result.error}');
       }
@@ -291,8 +302,9 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
       });
 
       // Process image for TFLite
-      final image =
-          await _mlHelper.image.loadImageFromBytes(_selectedImageBytes!);
+      final image = await _mlHelper.image.loadImageFromBytes(
+        _selectedImageBytes!,
+      );
       if (image == null) {
         throw Exception('Failed to decode image');
       }
@@ -323,7 +335,8 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
 
       if (result.isSuccess) {
         _showSuccess(
-            'MobileNet v3 classification successful! Found ${result.predictions.length} predictions');
+          'MobileNet v3 classification successful! Found ${result.predictions.length} predictions',
+        );
       } else {
         _showError('MobileNet v3 classification failed: ${result.error}');
       }
@@ -385,19 +398,13 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
     );
   }
 
@@ -544,8 +551,10 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                   children: [
                     const Text(
                       'Selected Image',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Image.memory(
@@ -574,7 +583,9 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                       const Text(
                         'Image Info',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       ..._mlHelper.image
@@ -664,8 +675,9 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                       alignment: WrapAlignment.center,
                       children: [
                         ElevatedButton.icon(
-                          onPressed:
-                              _isProcessing ? null : _testTextRecognition,
+                          onPressed: _isProcessing
+                              ? null
+                              : _testTextRecognition,
                           icon: const Icon(Icons.text_fields),
                           label: const Text('Text Recognition'),
                         ),
@@ -706,20 +718,22 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                       Text('Success: ${_lastResult!.isSuccess}'),
                       if (_lastResult!.isSuccess) ...[
                         Text(
-                            'Inference Time: ${_lastResult!.inferenceTime.toStringAsFixed(2)}ms'),
+                          'Inference Time: ${_lastResult!.inferenceTime.toStringAsFixed(2)}ms',
+                        ),
                         Text('Top Prediction: ${_lastResult!.topPrediction}'),
                         Text(
-                            'Top Confidence: ${(_lastResult!.topConfidence * 100).toStringAsFixed(1)}%'),
+                          'Top Confidence: ${(_lastResult!.topConfidence * 100).toStringAsFixed(1)}%',
+                        ),
                         const SizedBox(height: 8),
                         const Text(
                           'All Predictions:',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         ..._lastResult!.predictions.asMap().entries.map(
-                              (e) => Text(
-                                '${e.key + 1}. ${e.value} (${(_lastResult!.confidences[e.key] * 100).toStringAsFixed(1)}%)',
-                              ),
-                            ),
+                          (e) => Text(
+                            '${e.key + 1}. ${e.value} (${(_lastResult!.confidences[e.key] * 100).toStringAsFixed(1)}%)',
+                          ),
+                        ),
                       ] else
                         Text(
                           'Error: ${_lastResult!.error}',
@@ -750,8 +764,10 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.psychology,
-                          color: Theme.of(context).colorScheme.primary),
+                      Icon(
+                        Icons.psychology,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -779,8 +795,11 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.info_outline,
-                                  size: 20, color: Colors.blue[700]),
+                              Icon(
+                                Icons.info_outline,
+                                size: 20,
+                                color: Colors.blue[700],
+                              ),
                               const SizedBox(width: 8),
                               const Text(
                                 'About MobileNet v3',
@@ -807,8 +826,11 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
-                            Icon(Icons.image_not_supported,
-                                size: 48, color: Colors.orange[700]),
+                            Icon(
+                              Icons.image_not_supported,
+                              size: 48,
+                              color: Colors.orange[700],
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               'No Image Selected',
@@ -867,7 +889,8 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : const Icon(Icons.play_arrow),
@@ -882,8 +905,9 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                                   horizontal: 32,
                                   vertical: 16,
                                 ),
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                                 foregroundColor: Colors.white,
                               ),
                             ),
@@ -904,8 +928,11 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.settings,
-                                  size: 20, color: Colors.grey[700]),
+                              Icon(
+                                Icons.settings,
+                                size: 20,
+                                color: Colors.grey[700],
+                              ),
                               const SizedBox(width: 8),
                               const Text(
                                 'Model Specifications',
@@ -955,12 +982,8 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                                 const SizedBox(width: 8),
                                 Text(
                                   'Classification Results',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -1024,7 +1047,8 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                                   .map(
                                     (e) => Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 4),
+                                        vertical: 4,
+                                      ),
                                       child: Row(
                                         children: [
                                           Container(
@@ -1054,8 +1078,9 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                                           Expanded(
                                             child: Text(
                                               _getClassName(e.value),
-                                              style:
-                                                  const TextStyle(fontSize: 14),
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
                                             ),
                                           ),
                                           Container(
@@ -1106,14 +1131,8 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: Colors.grey[700]),
-          ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(label, style: TextStyle(color: Colors.grey[700])),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -1126,10 +1145,7 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(color: Colors.grey[700])),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -1193,21 +1209,31 @@ class _MLHelperExamplePageState extends State<MLHelperExamplePage>
                   ),
                   const SizedBox(height: 8),
                   _buildPermissionMethod(
-                      'Camera', 'PermissionUtils.isCameraPermissionGranted()'),
-                  _buildPermissionMethod('Storage',
-                      'PermissionUtils.isStoragePermissionGranted()'),
-                  _buildPermissionMethod('Microphone',
-                      'PermissionUtils.isMicrophonePermissionGranted()'),
-                  _buildPermissionMethod('Location',
-                      'PermissionUtils.isLocationPermissionGranted()'),
+                    'Camera',
+                    'PermissionUtils.isCameraPermissionGranted()',
+                  ),
+                  _buildPermissionMethod(
+                    'Storage',
+                    'PermissionUtils.isStoragePermissionGranted()',
+                  ),
+                  _buildPermissionMethod(
+                    'Microphone',
+                    'PermissionUtils.isMicrophonePermissionGranted()',
+                  ),
+                  _buildPermissionMethod(
+                    'Location',
+                    'PermissionUtils.isLocationPermissionGranted()',
+                  ),
                   const SizedBox(height: 16),
                   const Text(
                     'Request Permissions:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  _buildPermissionMethod('All ML Permissions',
-                      'PermissionUtils.requestAllMLPermissions()'),
+                  _buildPermissionMethod(
+                    'All ML Permissions',
+                    'PermissionUtils.requestAllMLPermissions()',
+                  ),
                 ],
               ),
             ),

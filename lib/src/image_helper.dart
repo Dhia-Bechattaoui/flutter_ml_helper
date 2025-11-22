@@ -1,14 +1,22 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'constants/ml_constants.dart';
+import 'constants/platform_detection.dart';
+import 'utils/image_format_detector.dart';
 
 /// Helper class for image processing operations
 /// Supports all platforms including web with WASM
 class ImageHelper {
+  static const MethodChannel _heicChannel = MethodChannel(
+    'flutter_ml_helper/heic_decoder',
+  );
+
   /// Creates an image helper instance
   ImageHelper();
 
   /// Loads an image from bytes (platform-aware)
+  /// Supports standard formats (JPEG, PNG, BMP, WebP) and HEIC on iOS/Android
   Future<img.Image?> loadImageFromBytes(dynamic bytes) async {
     try {
       Uint8List imageBytes;
@@ -21,10 +29,58 @@ class ImageHelper {
         throw Exception('Invalid image bytes format');
       }
 
+      // Detect image format
+      final format = ImageFormatDetector.detectFormat(imageBytes);
+
+      // Handle HEIC format using platform-specific decoding
+      if (format == 'heic' || format == 'heif') {
+        return await _decodeHeicImage(imageBytes);
+      }
+
+      // Handle standard formats using the image package
       final image = img.decodeImage(imageBytes);
       return image;
     } catch (e) {
       debugPrint('Failed to decode image: $e');
+      return null;
+    }
+  }
+
+  /// Decodes HEIC image bytes using platform-specific native implementations
+  /// Efficient for iOS/Android/macOS, falls back gracefully on other platforms
+  ///
+  /// Note: Requires platform channel setup (see platform_setup/HEIC_SETUP.md)
+  Future<img.Image?> _decodeHeicImage(Uint8List bytes) async {
+    try {
+      // Check if we're on a platform that supports native HEIC decoding
+      if (!PlatformDetection.isMobile && !PlatformDetection.isMacOS) {
+        debugPrint(
+          'HEIC format is not natively supported on this platform. '
+          'Please convert HEIC to JPEG/PNG before loading. '
+          'For iOS/Android/macOS support, see platform_setup/HEIC_SETUP.md',
+        );
+        return null;
+      }
+
+      // Use platform channel to decode HEIC using native iOS/Android APIs
+      final decodedBytes = await _heicChannel.invokeMethod<Uint8List>(
+        'decodeHeic',
+        {'bytes': bytes},
+      );
+
+      if (decodedBytes == null) {
+        debugPrint('Failed to decode HEIC image: Native decoder returned null');
+        return null;
+      }
+
+      // Decode the decoded bytes (should now be in a format the image package supports)
+      final image = img.decodeImage(decodedBytes);
+      return image;
+    } on PlatformException catch (e) {
+      debugPrint('Platform error decoding HEIC: ${e.message}');
+      return null;
+    } catch (e) {
+      debugPrint('Failed to decode HEIC image: $e');
       return null;
     }
   }

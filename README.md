@@ -23,6 +23,7 @@ Easy integration with TensorFlow Lite and ML Kit for Flutter applications. Suppo
 - 🌐 **Cross-Platform** - iOS, Android, Web, Windows, macOS, Linux
 - ⚡ **WASM Compatible** - WebAssembly support for web platform
 - 🖼️ **Image Processing** - Built-in image preprocessing utilities
+- 📸 **HEIC Support** - Native HEIC image decoding on iOS/Android
 - 🔐 **Permission Handling** - Automatic permission management
 - 📱 **Mobile Optimized** - Efficient resource management
 
@@ -45,7 +46,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_ml_helper: ^0.0.1
+  flutter_ml_helper: ^0.0.3
 ```
 
 ### Basic Usage
@@ -124,7 +125,7 @@ final faceResult = await mlKitHelper.runInference(
 // Preprocess images for ML models
 final imageHelper = mlHelper.image;
 
-// Load image
+// Load image (supports JPEG, PNG, BMP, WebP, and HEIC on iOS/Android)
 final image = await imageHelper.loadImageFromBytes(imageBytes);
 
 // Preprocess for ML
@@ -136,21 +137,30 @@ final processedImage = await imageHelper.preprocessImageForML(
 );
 ```
 
+#### HEIC Image Support
+
+HEIC format is now supported on iOS and Android. **No manual setup required!** The platform code is automatically included and registered.
+
+**Supported Formats:**
+- JPEG/PNG/BMP/WebP: Supported on all platforms
+- HEIC/HEIF: Supported on iOS 11+ and Android 9+ (automatic)
+
 ## Dependencies
 
-- **tflite_flutter**: ^0.10.4 - TensorFlow Lite support
-- **google_ml_kit**: ^0.16.3 - ML Kit integration
-- **image**: ^4.1.7 - Image processing
-- **path_provider**: ^2.1.2 - File path management
-- **permission_handler**: ^11.3.1 - Permission handling
-- **path**: ^1.8.3 - Path utilities
+- **tflite_flutter**: ^0.12.0 - TensorFlow Lite support
+- **google_ml_kit**: ^0.20.0 - ML Kit integration
+- **image**: ^4.0.0 - Image processing
+- **path_provider**: ^2.0.0 - File path management
+- **permission_handler**: ^12.0.0 - Permission handling
+- **path**: ^1.0.0 - Path utilities
+- **http**: ^1.0.0 - HTTP client for network requests
 
 ## Requirements
 
-- Flutter: 3.10.0+
-- Dart: 3.0.0+
+- Flutter: 3.32.0+
+- Dart: 3.8.0+
 - iOS: 11.0+
-- Android: API 21+
+- Android: API 21+ (API 28+ for HEIC support)
 - Web: Modern browsers with WASM support
 
 ## Configuration
